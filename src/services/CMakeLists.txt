@@ -4,6 +4,11 @@ add_library(rtu_services STATIC
     subscription/SubscriptionTier.h
     ServiceLocator.h
     ServiceLocator.cpp
+    # Dev-only stubs — compiled in for all build types during early phases
+    dev/StubAuthService.h
+    dev/StubAuthService.cpp
+    dev/StubSubscriptionService.h
+    dev/StubSubscriptionService.cpp
 )
 
 set_target_properties(rtu_services PROPERTIES LINKER_LANGUAGE CXX)

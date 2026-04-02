@@ -6,6 +6,9 @@
 
 // Stub ViewModels — concrete implementations added in Integration phase
 #include "ui/viewmodels/AppViewModel.h"
+#include "services/ServiceLocator.h"
+#include "services/dev/StubAuthService.h"
+#include "services/dev/StubSubscriptionService.h"
 
 // Statically import the rtu.ui QML plugin so the engine can find it
 // when the module is linked as a static library (no separate .so).
@@ -46,11 +49,15 @@ int Application::run()
 
 void Application::initServices()
 {
-    // TODO (Integration phase): instantiate concrete auth + subscription services
-    // auto auth = std::make_shared<ConcreteAuthService>();
-    // auto sub  = std::make_shared<ConcreteSubscriptionService>();
-    // ServiceLocator::instance().registerAuth(auth);
-    // ServiceLocator::instance().registerSubscription(sub);
+    // TODO (Integration phase): replace stubs with real backend services.
+    // Stubs accept any non-empty email/password and return Pro tier.
+    auto auth = std::make_shared<services::dev::StubAuthService>();
+    auto sub  = std::make_shared<services::dev::StubSubscriptionService>();
+
+    services::ServiceLocator::instance().registerAuth(auth);
+    services::ServiceLocator::instance().registerSubscription(sub);
+
+    qCInfo(rtuApp) << "Dev stub services registered (auth + subscription)";
 }
 
 void Application::registerQmlTypes()

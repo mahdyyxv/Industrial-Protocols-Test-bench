@@ -155,7 +155,7 @@ Item {
             radius: AppStyle.radiusSm
         }
         contentItem: Text {
-            text:  parent.parent.text
+            text:  root.locked ? root.label + " (Pro)" : root.label
             color: ThemeManager.text
             font.pixelSize: AppStyle.fontSm
         }

@@ -29,7 +29,7 @@ Rectangle {
     Behavior on implicitWidth {
         NumberAnimation {
             duration: AppStyle.animNormal
-            easing.type: AppStyle.animEasing
+            easing.type: Easing.OutCubic
         }
     }
 

@@ -49,7 +49,8 @@ QtObject {
     readonly property int animNormal: 220
     readonly property int animSlow:   380
 
-    readonly property int animEasing: Easing.OutCubic
+    // Use Easing.OutCubic directly in animations — not stored as int
+    // (Easing enums are not safely storable as int in QtObject singletons)
 
     // ── Elevation (shadow helpers) ────────────────────────────
     // Usage: layer.enabled + layer.effect (DropShadow)

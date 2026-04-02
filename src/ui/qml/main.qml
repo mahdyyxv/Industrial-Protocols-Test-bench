@@ -36,7 +36,7 @@ ApplicationWindow {
         property: "opacity"
         from: 0; to: 1
         duration: AppStyle.animNormal
-        easing.type: AppStyle.animEasing
+        easing.type: Easing.OutCubic
     }
 
     // ── Keyboard shortcuts ────────────────────────────────────

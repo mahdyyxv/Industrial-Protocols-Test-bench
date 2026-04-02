@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import rtu.ui
 
 // ─────────────────────────────────────────────────────────────
@@ -43,7 +44,9 @@ Item {
         if (pageId === currentPageId) return
         currentPageId = pageId
         const route = _routes[pageId] || "pages/DashboardPage.qml"
-        contentStack.push(route, { pageId: pageId }, StackView.PushTransition)
+        // Pass pageId only to pages that share a component (e.g. ModbusPage for RTU/TCP)
+        const props = (pageId === "modbus_tcp") ? { pageId: pageId } : {}
+        contentStack.push(route, props, StackView.PushTransition)
     }
 
     // ── Layout ────────────────────────────────────────────────
@@ -96,13 +99,13 @@ Item {
                             property: "opacity"
                             from: 0; to: 1
                             duration: AppStyle.animNormal
-                            easing.type: AppStyle.animEasing
+                            easing.type: Easing.OutCubic
                         }
                         NumberAnimation {
                             property: "x"
                             from: 24; to: 0
                             duration: AppStyle.animNormal
-                            easing.type: AppStyle.animEasing
+                            easing.type: Easing.OutCubic
                         }
                     }
                 }
@@ -121,13 +124,13 @@ Item {
                             property: "opacity"
                             from: 0; to: 1
                             duration: AppStyle.animNormal
-                            easing.type: AppStyle.animEasing
+                            easing.type: Easing.OutCubic
                         }
                         NumberAnimation {
                             property: "x"
                             from: -24; to: 0
                             duration: AppStyle.animNormal
-                            easing.type: AppStyle.animEasing
+                            easing.type: Easing.OutCubic
                         }
                     }
                 }

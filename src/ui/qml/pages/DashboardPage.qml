@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import rtu.ui
 
 // ─────────────────────────────────────────────────────────────
@@ -19,9 +20,9 @@ ScrollView {
     }
 
     ColumnLayout {
-        width:   root.availableWidth
+        x:       AppStyle.contentPadding
+        width:   root.availableWidth - AppStyle.contentPadding * 2
         spacing: AppStyle.spaceLg
-        padding: AppStyle.contentPadding
 
         // ── Stat cards row ────────────────────────────────
         Row {
