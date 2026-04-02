@@ -1,0 +1,5 @@
+add_subdirectory(app)
+add_subdirectory(core)
+add_subdirectory(services)
+add_subdirectory(ui)
+add_subdirectory(utils)
