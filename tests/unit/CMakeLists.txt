@@ -33,3 +33,17 @@ add_test(
 set_tests_properties(tst_ui tst_protocol_interface PROPERTIES
     ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
 )
+
+# ── Serial manager tests ──────────────────────────────────────
+qt_add_executable(tst_serial_manager
+    tst_serial_manager.cpp
+)
+target_include_directories(tst_serial_manager PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(tst_serial_manager PRIVATE Qt6::Test Qt6::Core rtu_core)
+if(Qt6SerialPort_FOUND)
+    target_link_libraries(tst_serial_manager PRIVATE Qt6::SerialPort)
+endif()
+add_test(NAME tst_serial COMMAND tst_serial_manager)
+set_tests_properties(tst_serial PROPERTIES
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+)
