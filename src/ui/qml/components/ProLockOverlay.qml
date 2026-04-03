@@ -55,7 +55,7 @@ Item {
                 font {
                     pixelSize: AppStyle.fontXl
                     family:    AppStyle.fontFamily
-                    weight:    Font.SemiBold
+                    weight:    600
                 }
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode:            Text.WordWrap
@@ -94,7 +94,7 @@ Item {
                     font {
                         pixelSize: AppStyle.fontMd
                         family:    AppStyle.fontFamily
-                        weight:    Font.Medium
+                        weight:    500
                     }
                 }
 

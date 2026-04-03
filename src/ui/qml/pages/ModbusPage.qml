@@ -53,7 +53,7 @@ Item {
                         Text {
                             text:  "Connection"
                             color: ThemeManager.text
-                            font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: Font.SemiBold }
+                            font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: 600 }
                             Layout.fillWidth: true
                         }
                         StatusBadge {
@@ -139,7 +139,7 @@ Item {
                     Text {
                         text:  "Request"
                         color: ThemeManager.text
-                        font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: Font.SemiBold }
+                        font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: 600 }
                     }
 
                     // Function code selector
@@ -218,7 +218,7 @@ Item {
                         Text {
                             text:  "Response"
                             color: ThemeManager.text
-                            font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: Font.SemiBold }
+                            font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: 600 }
                             Layout.fillWidth: true
                         }
                         ActionButton { label: Icons.clear + "  Clear"; isPrimary: false }
@@ -240,7 +240,7 @@ Item {
                                 delegate: Text {
                                     text:  modelData
                                     color: ThemeManager.textSecondary
-                                    font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily; weight: Font.Medium }
+                                    font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily; weight: 500 }
                                     Layout.fillWidth: true
                                 }
                             }
@@ -279,7 +279,7 @@ Item {
                         Text {
                             text:  "Raw Log"
                             color: ThemeManager.text
-                            font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: Font.SemiBold }
+                            font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: 600 }
                             Layout.fillWidth: true
                         }
                         ActionButton { label: Icons.copy; isPrimary: false }

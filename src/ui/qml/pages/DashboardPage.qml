@@ -71,7 +71,7 @@ ScrollView {
                             font {
                                 pixelSize: AppStyle.font3xl
                                 family:    AppStyle.fontFamily
-                                weight:    Font.Bold
+                                weight:    700
                             }
                         }
                     }
@@ -90,7 +90,7 @@ ScrollView {
                 font {
                     pixelSize: AppStyle.fontLg
                     family:    AppStyle.fontFamily
-                    weight:    Font.SemiBold
+                    weight:    600
                 }
             }
 
@@ -174,7 +174,7 @@ ScrollView {
                 font {
                     pixelSize: AppStyle.fontLg
                     family:    AppStyle.fontFamily
-                    weight:    Font.SemiBold
+                    weight:    600
                 }
             }
 

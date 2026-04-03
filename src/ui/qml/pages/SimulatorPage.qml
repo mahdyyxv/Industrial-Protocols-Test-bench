@@ -36,7 +36,7 @@ Item {
                     Text {
                         text:  "Simulator Config"
                         color: ThemeManager.text
-                        font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: Font.SemiBold }
+                        font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: 600 }
                     }
 
                     Repeater {
@@ -80,7 +80,7 @@ Item {
                             anchors.centerIn: parent
                             text:  Icons.play + "  Start Simulator"
                             color: "#FFFFFF"
-                            font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: Font.Medium }
+                            font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: 500 }
                         }
                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor }
                     }
@@ -103,7 +103,7 @@ Item {
                         Text {
                             text:  "Register Map"
                             color: ThemeManager.text
-                            font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: Font.SemiBold }
+                            font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: 600 }
                             Layout.fillWidth: true
                         }
                         Rectangle {
@@ -125,7 +125,7 @@ Item {
                                 delegate: Text {
                                     text:  modelData
                                     color: ThemeManager.textSecondary
-                                    font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily; weight: Font.Medium }
+                                    font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily; weight: 500 }
                                     Layout.fillWidth: true
                                 }
                             }

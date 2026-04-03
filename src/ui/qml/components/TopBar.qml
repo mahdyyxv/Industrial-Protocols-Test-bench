@@ -47,7 +47,7 @@ Rectangle {
             font {
                 pixelSize: AppStyle.fontLg
                 family:    AppStyle.fontFamily
-                weight:    Font.SemiBold
+                weight:    600
             }
         }
 
@@ -188,7 +188,7 @@ Rectangle {
                 font {
                     pixelSize: AppStyle.fontSm
                     family:    AppStyle.fontFamily
-                    weight:    Font.Medium
+                    weight:    500
                 }
             }
         }

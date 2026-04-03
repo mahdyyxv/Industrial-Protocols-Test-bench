@@ -88,7 +88,7 @@ Rectangle {
                         anchors.centerIn: parent
                         text:  "R"
                         color: "#FFFFFF"
-                        font { pixelSize: AppStyle.fontLg; weight: Font.Bold }
+                        font { pixelSize: AppStyle.fontLg; weight: 700 }
                     }
                 }
 
@@ -99,7 +99,7 @@ Rectangle {
                     font {
                         pixelSize: AppStyle.fontLg
                         family:    AppStyle.fontFamily
-                        weight:    Font.SemiBold
+                        weight:    600
                     }
                     opacity: root.collapsed ? 0 : 1
                     Behavior on opacity { NumberAnimation { duration: AppStyle.animFast } }

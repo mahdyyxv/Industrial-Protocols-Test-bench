@@ -28,7 +28,7 @@ Item {
                 Text {
                     text:  "Protocol Analyzer"
                     color: ThemeManager.text
-                    font { pixelSize: AppStyle.fontXl; family: AppStyle.fontFamily; weight: Font.SemiBold }
+                    font { pixelSize: AppStyle.fontXl; family: AppStyle.fontFamily; weight: 600 }
                     Layout.fillWidth: true
                 }
 
@@ -73,7 +73,7 @@ Item {
                                 delegate: Text {
                                     text:  modelData
                                     color: ThemeManager.textSecondary
-                                    font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily; weight: Font.Medium }
+                                    font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily; weight: 500 }
                                     Layout.preferredWidth: index === 5 ? -1 : 80
                                     Layout.fillWidth: index === 5
                                 }
@@ -106,7 +106,7 @@ Item {
                     Text {
                         text:  "Frame Detail"
                         color: ThemeManager.text
-                        font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: Font.SemiBold }
+                        font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: 600 }
                     }
                     Text {
                         text:  "Select a frame above to inspect its fields."

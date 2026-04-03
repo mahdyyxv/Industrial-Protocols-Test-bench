@@ -63,7 +63,7 @@ Item {
                         anchors.centerIn: parent
                         text:  "R"
                         color: "#FFFFFF"
-                        font { pixelSize: AppStyle.font2xl; weight: Font.Bold }
+                        font { pixelSize: AppStyle.font2xl; weight: 700 }
                     }
                 }
 
@@ -74,7 +74,7 @@ Item {
                     font {
                         pixelSize: AppStyle.font2xl
                         family:    AppStyle.fontFamily
-                        weight:    Font.Bold
+                        weight:    700
                     }
                 }
 
@@ -269,7 +269,7 @@ Item {
                         font {
                             pixelSize: AppStyle.fontMd
                             family:    AppStyle.fontFamily
-                            weight:    Font.Medium
+                            weight:    500
                         }
                         anchors.verticalCenter: parent.verticalCenter
                     }

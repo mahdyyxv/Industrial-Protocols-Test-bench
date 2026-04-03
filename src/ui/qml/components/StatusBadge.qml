@@ -40,7 +40,7 @@ Item {
             id: badgeText
             text:  _label
             color: _color
-            font { pixelSize: AppStyle.fontXs; family: AppStyle.fontFamily; weight: Font.Medium }
+            font { pixelSize: AppStyle.fontXs; family: AppStyle.fontFamily; weight: 500 }
             anchors.verticalCenter: parent.verticalCenter
         }
     }

@@ -105,7 +105,7 @@ Item {
             font {
                 pixelSize: AppStyle.fontBase
                 family:    AppStyle.fontFamily
-                weight:    root.active ? Font.Medium : Font.Normal
+                weight:    root.active ? 500 : 400
             }
             elide: Text.ElideRight
             opacity: root.collapsed ? 0 : 1

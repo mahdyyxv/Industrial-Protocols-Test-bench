@@ -42,7 +42,7 @@ Item {
                     font {
                         pixelSize: AppStyle.fontXl
                         family:    AppStyle.fontFamily
-                        weight:    Font.SemiBold
+                        weight:    600
                     }
                 }
 

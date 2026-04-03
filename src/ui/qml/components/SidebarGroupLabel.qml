@@ -20,7 +20,7 @@ Item {
         font {
             pixelSize: AppStyle.fontXs
             family:    AppStyle.fontFamily
-            weight:    Font.Medium
+            weight:    500
             letterSpacing: 0.8
         }
         opacity: parent.collapsed ? 0 : 1
