@@ -68,4 +68,25 @@ TestCase {
     function test_availableThemesCount() {
         compare(ThemeManager.availableThemes.length, 5)
     }
+
+    // ── Token reactivity (regression for indirect-binding bug) ──
+    function test_backgroundChangesOnThemeSwitch() {
+        ThemeManager.setTheme("Dark")
+        const darkBg = ThemeManager.background.toString()
+        ThemeManager.setTheme("Light")
+        const lightBg = ThemeManager.background.toString()
+        verify(darkBg !== lightBg,
+               "background token must change when theme switches")
+        ThemeManager.setTheme("Dark")
+    }
+
+    function test_accentChangesOnThemeSwitch() {
+        ThemeManager.setTheme("Dark")
+        const darkAccent = ThemeManager.accent.toString()
+        ThemeManager.setTheme("Monokai")
+        const monokaiAccent = ThemeManager.accent.toString()
+        verify(darkAccent !== monokaiAccent,
+               "accent token must change between Dark and Monokai")
+        ThemeManager.setTheme("Dark")
+    }
 }
