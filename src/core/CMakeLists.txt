@@ -74,3 +74,10 @@ target_sources(rtu_core PRIVATE
     analyzer/PacketAnalyzer.h
     analyzer/PacketAnalyzer.cpp
 )
+
+# ── Device Simulator module — always built ────────────────────
+target_sources(rtu_core PRIVATE
+    simulator/SimulatorScenario.h
+    simulator/DeviceSimulator.h
+    simulator/DeviceSimulator.cpp
+)

@@ -76,6 +76,21 @@ if(lib60870_FOUND)
     )
 endif()
 
+# ── Device Simulator tests (GoogleTest) ──────────────────────
+add_executable(tst_simulator tst_simulator.cpp)
+target_include_directories(tst_simulator PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(tst_simulator PRIVATE
+    GTest::gtest
+    GTest::gmock
+    Qt6::Core
+    Qt6::Test
+    rtu_core
+)
+add_test(NAME tst_simulator COMMAND tst_simulator)
+set_tests_properties(tst_simulator PROPERTIES
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+)
+
 # ── Packet Analyzer tests (GoogleTest) ───────────────────────
 add_executable(tst_analyzer tst_analyzer.cpp)
 target_include_directories(tst_analyzer PRIVATE ${CMAKE_SOURCE_DIR}/src)
