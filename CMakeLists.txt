@@ -49,6 +49,49 @@ add_compile_definitions(
     APP_NAME="${PROJECT_NAME}"
 )
 
+# ── libmodbus — optional, enables Modbus RTU + TCP module ─────
+# Linux:   sudo apt-get install libmodbus-dev
+# Windows: vcpkg install libmodbus  (then pass -DCMAKE_TOOLCHAIN_FILE=.../vcpkg.cmake)
+find_package(libmodbus QUIET CONFIG)   # vcpkg / CMake config style (creates libmodbus::modbus)
+
+if(NOT libmodbus_FOUND)
+    find_package(PkgConfig QUIET)
+    if(PkgConfig_FOUND)
+        # IMPORTED_TARGET creates PkgConfig::MODBUS with correct link flags automatically
+        pkg_check_modules(MODBUS QUIET IMPORTED_TARGET libmodbus)
+        if(MODBUS_FOUND)
+            set(libmodbus_FOUND TRUE)
+        endif()
+    endif()
+endif()
+
+if(libmodbus_FOUND)
+    message(STATUS "libmodbus found — Modbus module enabled")
+else()
+    message(WARNING "libmodbus not found — Modbus module disabled.\n"
+        "   Linux:   sudo apt-get install libmodbus-dev\n"
+        "   Windows: vcpkg install libmodbus")
+endif()
+
+# ── lib60870-C — IEC 60870-5-104 client library ───────────────
+# Fetched automatically; no system install required.
+# Source: https://github.com/mz-automation/lib60870
+include(FetchContent)
+FetchContent_Declare(
+    lib60870
+    GIT_REPOSITORY https://github.com/mz-automation/lib60870.git
+    GIT_TAG        v2.3.2
+    GIT_SHALLOW    TRUE
+    SOURCE_SUBDIR  lib60870-C
+)
+# Suppress the library's own examples and tests
+set(WITH_EXAMPLES     OFF CACHE BOOL "" FORCE)
+set(BUILD_TESTS       OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(lib60870)
+set(lib60870_FOUND TRUE)
+message(STATUS "lib60870-C fetched — IEC-104 module enabled")
+
 add_subdirectory(src)
 
 enable_testing()
