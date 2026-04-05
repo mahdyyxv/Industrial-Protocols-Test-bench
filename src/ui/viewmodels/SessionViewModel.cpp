@@ -73,12 +73,12 @@ void SessionViewModel::connect(const QVariantMap& params)
         }
         m_modbus->setSlaveId(params.value(QStringLiteral("slaveId"), 1).toInt());
     }
-    m_modbus->connect();
+    m_modbus->connectDevice();
 }
 
 void SessionViewModel::disconnect()
 {
-    m_modbus->disconnect();
+    m_modbus->disconnectDevice();
 }
 
 void SessionViewModel::sendRequest(const QVariantMap& params)

@@ -63,10 +63,10 @@ public:
 
     // Connect to device using current config properties.
     // Switches TCP/RTU based on mode property.
-    Q_INVOKABLE void connect();
+    Q_INVOKABLE void connectDevice();
 
     // Disconnect and destroy the active client.
-    Q_INVOKABLE void disconnect();
+    Q_INVOKABLE void disconnectDevice();
 
     // Read `count` holding registers starting at `address`.
     // Emits readCompleted(values) on success.

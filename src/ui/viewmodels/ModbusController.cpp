@@ -39,10 +39,10 @@ void ModbusController::setSlaveId (int v)            { if (m_slaveId  != v) { m_
 
 // ── connect() ─────────────────────────────────────────────────
 
-void ModbusController::connect()
+void ModbusController::connectDevice()
 {
     if (m_connected) {
-        disconnect();
+        disconnectDevice();
         return;
     }
 
@@ -99,7 +99,7 @@ void ModbusController::connect()
 
 // ── disconnect() ──────────────────────────────────────────────
 
-void ModbusController::disconnect()
+void ModbusController::disconnectDevice()
 {
     if (!m_connected) return;
 

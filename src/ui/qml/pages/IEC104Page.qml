@@ -69,7 +69,7 @@ Item {
                         // State text
                         Text { text: IECVM.stateText; color: ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
 
-                        IecButton { label: IECVM.connected ? "Disconnect" : "Connect"; isPrimary: true; Layout.fillWidth: true; onClicked: IECVM.connect() }
+                        IecButton { label: IECVM.connected ? "Disconnect" : "Connect"; isPrimary: true; Layout.fillWidth: true; onClicked: IECVM.connected ? IECVM.disconnectDevice() : IECVM.connectDevice() }
                     }
                 }
 

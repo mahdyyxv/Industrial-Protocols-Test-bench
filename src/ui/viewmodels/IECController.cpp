@@ -11,7 +11,7 @@ IECController::IECController(QObject* parent)
     : QObject(parent)
 {}
 
-IECController::~IECController() { disconnect(); }
+IECController::~IECController() { disconnectDevice(); }
 
 // ── Accessors ─────────────────────────────────────────────────
 
@@ -31,9 +31,9 @@ void IECController::setCommonAddress(int v)            { if (m_commonAddress != 
 
 // ── connect() ─────────────────────────────────────────────────
 
-void IECController::connect()
+void IECController::connectDevice()
 {
-    if (m_connected) { disconnect(); return; }
+    if (m_connected) { disconnectDevice(); return; }
 
 #ifdef RTU_IEC104_ENABLED
     m_client = std::make_unique<core::iec104::IEC104Client>(this);
@@ -73,7 +73,7 @@ void IECController::connect()
 
 // ── disconnect() ──────────────────────────────────────────────
 
-void IECController::disconnect()
+void IECController::disconnectDevice()
 {
     if (!m_connected) return;
 

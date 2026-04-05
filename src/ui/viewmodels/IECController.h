@@ -50,10 +50,10 @@ public:
     // ── QML API ───────────────────────────────────────────────
 
     // Connect to outstation at current host:port. Starts data transfer.
-    Q_INVOKABLE void connect();
+    Q_INVOKABLE void connectDevice();
 
     // Disconnect from outstation.
-    Q_INVOKABLE void disconnect();
+    Q_INVOKABLE void disconnectDevice();
 
     // Send STARTDT activation.
     Q_INVOKABLE void sendStartDT();

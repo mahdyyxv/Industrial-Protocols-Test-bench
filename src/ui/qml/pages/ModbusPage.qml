@@ -124,7 +124,7 @@ Item {
                         Layout.fillWidth: true
                         label: ModbusVM.connected ? "Disconnect" : "Connect"
                         isPrimary: true
-                        onClicked: ModbusVM.connect()
+                        onClicked: ModbusVM.connected ? ModbusVM.disconnectDevice() : ModbusVM.connectDevice()
                     }
                 }
             }
