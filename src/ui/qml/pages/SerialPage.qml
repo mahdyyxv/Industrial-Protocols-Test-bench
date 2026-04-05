@@ -211,7 +211,6 @@ Item {
     component ConfigField: Rectangle {
         property alias text:        _ci.text
         property string placeholder: ""
-        signal textChanged()
 
         Layout.fillWidth: true
         height: AppStyle.inputHeight
@@ -225,7 +224,6 @@ Item {
             color: ThemeManager.text
             font { pixelSize: AppStyle.fontBase; family: AppStyle.fontFamily }
             clip: true
-            onTextChanged: parent.textChanged()
             Text {
                 visible: !parent.text && !parent.activeFocus
                 text:    parent.parent.placeholder

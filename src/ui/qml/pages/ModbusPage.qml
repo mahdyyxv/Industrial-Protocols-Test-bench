@@ -184,7 +184,7 @@ Item {
                         Layout.fillWidth: true
                         label:     Icons.send + "  Send Request"
                         isPrimary: true
-                        enabled:   ModbusVM.connected
+                        isEnabled: ModbusVM.connected
                         onClicked: {
                             const fc = parseInt(fcField.text) || 3
                             const addr = parseInt(addrField.text) || 0
@@ -377,7 +377,6 @@ Item {
     component InputField: Rectangle {
         property alias text:        _input.text
         property string placeholder: ""
-        signal textChanged()
 
         height: AppStyle.inputHeight
         radius: AppStyle.radiusMd
@@ -390,7 +389,6 @@ Item {
             color: ThemeManager.text
             font { pixelSize: AppStyle.fontBase; family: AppStyle.fontFamily }
             clip: true
-            onTextChanged: parent.textChanged()
             Text {
                 visible: !parent.text && !parent.activeFocus
                 text:    parent.parent.placeholder
@@ -404,13 +402,13 @@ Item {
     component ActionButton: Rectangle {
         property string label:     ""
         property bool   isPrimary: true
-        property bool   enabled:   true
+        property bool   isEnabled: true
         signal clicked()
 
         implicitWidth:  _btnText.implicitWidth + AppStyle.spaceLg * 2
         implicitHeight: AppStyle.buttonHeightSm
         radius: AppStyle.radiusMd
-        opacity: enabled ? 1.0 : 0.4
+        opacity: isEnabled ? 1.0 : 0.4
         color: {
             if (isPrimary) return _btnHover.containsMouse ? ThemeManager.accentHover : ThemeManager.accent
             return _btnHover.containsMouse
@@ -431,8 +429,8 @@ Item {
             id: _btnHover
             anchors.fill: parent
             hoverEnabled: true
-            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-            onClicked: if (parent.enabled) parent.clicked()
+            cursorShape: isEnabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+            onClicked: if (parent.isEnabled) parent.clicked()
         }
     }
 }

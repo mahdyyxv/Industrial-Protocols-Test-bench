@@ -88,9 +88,9 @@ Item {
 
                         Text { text: "Session Control"; color: ThemeManager.text; font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: 600 } }
 
-                        IecButton { label: "STARTDT"; Layout.fillWidth: true; isPrimary: false; enabled: IECVM.connected; onClicked: IECVM.sendStartDT() }
-                        IecButton { label: "STOPDT";  Layout.fillWidth: true; isPrimary: false; enabled: IECVM.connected; onClicked: IECVM.sendStopDT() }
-                        IecButton { label: "Interrogation (C_IC_NA_1)"; Layout.fillWidth: true; isPrimary: false; enabled: IECVM.connected; onClicked: IECVM.sendInterrogation() }
+                        IecButton { label: "STARTDT"; Layout.fillWidth: true; isPrimary: false; isEnabled: IECVM.connected; onClicked: IECVM.sendStartDT() }
+                        IecButton { label: "STOPDT";  Layout.fillWidth: true; isPrimary: false; isEnabled: IECVM.connected; onClicked: IECVM.sendStopDT() }
+                        IecButton { label: "Interrogation (C_IC_NA_1)"; Layout.fillWidth: true; isPrimary: false; isEnabled: IECVM.connected; onClicked: IECVM.sendInterrogation() }
                         IecButton { label: "Clear Data Points"; Layout.fillWidth: true; isPrimary: false; onClicked: IECVM.clearDataPoints() }
                     }
                 }
@@ -186,7 +186,6 @@ Item {
     component IecField: Rectangle {
         property alias text:        _if.text
         property string placeholder: ""
-        signal textChanged()
         Layout.fillWidth: true; height: AppStyle.inputHeight
         radius: AppStyle.radiusMd; color: ThemeManager.background
         border { color: _if.activeFocus ? ThemeManager.borderFocus : ThemeManager.border; width: 1 }
@@ -194,7 +193,6 @@ Item {
             id: _if
             anchors { fill: parent; leftMargin: AppStyle.spaceSm + AppStyle.spaceXs; rightMargin: AppStyle.spaceSm }
             color: ThemeManager.text; font.pixelSize: AppStyle.fontBase; font.family: AppStyle.fontFamily; clip: true
-            onTextChanged: parent.textChanged()
             Text { visible: !parent.text && !parent.activeFocus; text: parent.parent.placeholder; color: ThemeManager.textDisabled; font: parent.font; anchors { left: parent.left; verticalCenter: parent.verticalCenter } }
         }
     }
@@ -202,14 +200,14 @@ Item {
     component IecButton: Rectangle {
         property string label:     ""
         property bool   isPrimary: true
-        property bool   enabled:   true
+        property bool   isEnabled: true
         signal clicked()
         implicitWidth: _ib.implicitWidth + AppStyle.spaceLg * 2; implicitHeight: AppStyle.buttonHeightSm
-        radius: AppStyle.radiusMd; opacity: enabled ? 1.0 : 0.4
+        radius: AppStyle.radiusMd; opacity: isEnabled ? 1.0 : 0.4
         color: isPrimary ? (_ibh.containsMouse ? ThemeManager.accentHover : ThemeManager.accent) : (_ibh.containsMouse ? Qt.rgba(ThemeManager.text.r, ThemeManager.text.g, ThemeManager.text.b, 0.08) : "transparent")
         border { color: isPrimary ? "transparent" : ThemeManager.border; width: 1 }
         Behavior on color { ColorAnimation { duration: AppStyle.animFast } }
         Text { id: _ib; anchors.centerIn: parent; text: label; color: isPrimary ? "#FFF" : ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
-        MouseArea { id: _ibh; anchors.fill: parent; hoverEnabled: true; cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor; onClicked: if (parent.enabled) parent.clicked() }
+        MouseArea { id: _ibh; anchors.fill: parent; hoverEnabled: true; cursorShape: isEnabled ? Qt.PointingHandCursor : Qt.ArrowCursor; onClicked: if (parent.isEnabled) parent.clicked() }
     }
 }
