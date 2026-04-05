@@ -5,7 +5,7 @@ import rtu.ui
 // ─────────────────────────────────────────────────────────────
 // SerialPage  (Free)
 //
-// Raw serial port monitor — send and receive raw bytes.
+// Binds to SerialVM (SerialController context property).
 // ─────────────────────────────────────────────────────────────
 Item {
     Rectangle { anchors.fill: parent; color: ThemeManager.background }
@@ -14,7 +14,7 @@ Item {
         anchors { fill: parent; margins: AppStyle.contentPadding }
         spacing: AppStyle.spaceMd
 
-        // Config panel
+        // ── Config panel ──────────────────────────────────────
         Rectangle {
             Layout.preferredWidth: 260
             Layout.fillHeight:     true
@@ -32,36 +32,34 @@ Item {
                     font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: 600 }
                 }
 
-                Repeater {
-                    model: [
-                        { label: "Port",       placeholder: "COM1" },
-                        { label: "Baud Rate",  placeholder: "9600" },
-                        { label: "Data Bits",  placeholder: "8"    },
-                        { label: "Parity",     placeholder: "None" },
-                        { label: "Stop Bits",  placeholder: "1"    },
-                    ]
-                    delegate: ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: AppStyle.spaceXs
-                        Text {
-                            text:  modelData.label
-                            color: ThemeManager.textSecondary
-                            font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily }
-                        }
-                        Rectangle {
-                            Layout.fillWidth: true
-                            height: AppStyle.inputHeight
-                            radius: AppStyle.radiusMd
-                            color:  ThemeManager.background
-                            border { color: ThemeManager.border; width: 1 }
-                            Text {
-                                anchors { left: parent.left; leftMargin: AppStyle.spaceSm + AppStyle.spaceXs; verticalCenter: parent.verticalCenter }
-                                text:  modelData.placeholder
-                                color: ThemeManager.textDisabled
-                                font { pixelSize: AppStyle.fontBase; family: AppStyle.fontFamily }
-                            }
-                        }
-                    }
+                // Port
+                ColumnLayout { Layout.fillWidth: true; spacing: AppStyle.spaceXs
+                    Text { text: "Port"; color: ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
+                    ConfigField { id: portF; placeholder: "COM1"; text: SerialVM.portName; onTextChanged: SerialVM.portName = text }
+                }
+
+                // Baud Rate
+                ColumnLayout { Layout.fillWidth: true; spacing: AppStyle.spaceXs
+                    Text { text: "Baud Rate"; color: ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
+                    ConfigField { placeholder: "9600"; text: SerialVM.baudRate; onTextChanged: { const v = parseInt(text); if (!isNaN(v)) SerialVM.baudRate = v } }
+                }
+
+                // Data Bits
+                ColumnLayout { Layout.fillWidth: true; spacing: AppStyle.spaceXs
+                    Text { text: "Data Bits"; color: ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
+                    ConfigField { placeholder: "8"; text: SerialVM.dataBits; onTextChanged: { const v = parseInt(text); if (!isNaN(v)) SerialVM.dataBits = v } }
+                }
+
+                // Parity
+                ColumnLayout { Layout.fillWidth: true; spacing: AppStyle.spaceXs
+                    Text { text: "Parity"; color: ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
+                    ConfigField { placeholder: "None"; text: SerialVM.parity; onTextChanged: SerialVM.parity = text }
+                }
+
+                // Stop Bits
+                ColumnLayout { Layout.fillWidth: true; spacing: AppStyle.spaceXs
+                    Text { text: "Stop Bits"; color: ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
+                    ConfigField { placeholder: "1"; text: SerialVM.stopBits; onTextChanged: { const v = parseInt(text); if (!isNaN(v)) SerialVM.stopBits = v } }
                 }
 
                 Item { Layout.fillHeight: true }
@@ -70,24 +68,25 @@ Item {
                     Layout.fillWidth: true
                     height: AppStyle.buttonHeight
                     radius: AppStyle.radiusMd
-                    color:  ThemeManager.accent
+                    color:  SerialVM.portOpen ? "#CC2222" : ThemeManager.accent
+                    Behavior on color { ColorAnimation { duration: AppStyle.animFast } }
 
                     Text {
                         anchors.centerIn: parent
-                        text:  "Open Port"
+                        text:  SerialVM.portOpen ? "Close Port" : "Open Port"
                         color: "#FFFFFF"
                         font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: 500 }
                     }
-
                     MouseArea {
                         anchors.fill: parent
                         cursorShape:  Qt.PointingHandCursor
+                        onClicked:    SerialVM.open()
                     }
                 }
             }
         }
 
-        // Terminal
+        // ── Terminal ──────────────────────────────────────────
         Rectangle {
             Layout.fillWidth:  true
             Layout.fillHeight: true
@@ -101,26 +100,51 @@ Item {
 
                 RowLayout {
                     Text {
-                        text:  "Terminal"
-                        color: ThemeManager.text
+                        text: "Terminal"; color: ThemeManager.text
                         font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: 600 }
                         Layout.fillWidth: true
                     }
-                    StatusBadge { status: "disconnected" }
+                    StatusBadge { status: SerialVM.portOpen ? "connected" : "disconnected" }
+                    Rectangle {
+                        width: 60; height: AppStyle.buttonHeightSm
+                        radius: AppStyle.radiusMd; color: "transparent"
+                        border { color: ThemeManager.border; width: 1 }
+                        Text { anchors.centerIn: parent; text: Icons.clear; color: ThemeManager.textSecondary; font.pixelSize: AppStyle.fontSm }
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: SerialVM.clearTerminal() }
+                    }
                 }
 
+                // Terminal output
                 Rectangle {
                     Layout.fillWidth:  true
                     Layout.fillHeight: true
                     radius: AppStyle.radiusSm
                     color:  ThemeManager.background
 
-                    // Terminal output — bind to SessionVM.terminalLines
-                    Text {
+                    ListView {
                         anchors { fill: parent; margins: AppStyle.spaceSm }
-                        text:  "Waiting for connection…"
-                        color: ThemeManager.textSecondary
-                        font { pixelSize: AppStyle.fontSm; family: AppStyle.fontMono }
+                        model: SerialVM.terminalLines
+                        clip:  true
+                        verticalLayoutDirection: ListView.BottomToTop
+
+                        delegate: Text {
+                            required property string modelData
+                            width: ListView.view.width
+                            text:  modelData
+                            color: modelData.includes("→") ? ThemeManager.accent
+                                 : modelData.includes("←") ? ThemeManager.text
+                                 : ThemeManager.textSecondary
+                            font { pixelSize: AppStyle.fontSm; family: AppStyle.fontMono }
+                            wrapMode: Text.WrapAnywhere
+                        }
+
+                        Text {
+                            visible: parent.count === 0
+                            anchors.centerIn: parent
+                            text:  "Waiting for connection…"
+                            color: ThemeManager.textSecondary
+                            font { pixelSize: AppStyle.fontSm; family: AppStyle.fontMono }
+                        }
                     }
                 }
 
@@ -134,15 +158,18 @@ Item {
                         height: AppStyle.inputHeight
                         radius: AppStyle.radiusMd
                         color:  ThemeManager.background
-                        border { color: ThemeManager.border; width: 1 }
+                        border { color: sendInput.activeFocus ? ThemeManager.borderFocus : ThemeManager.border; width: 1 }
+
                         TextInput {
+                            id: sendInput
                             anchors { fill: parent; leftMargin: AppStyle.spaceSm + AppStyle.spaceXs; rightMargin: AppStyle.spaceSm }
                             color: ThemeManager.text
                             font { pixelSize: AppStyle.fontBase; family: AppStyle.fontMono }
-                            clip:  true
+                            clip: true
+                            Keys.onReturnPressed: sendBtn.doSend()
                             Text {
                                 visible: !parent.text && !parent.activeFocus
-                                text:    "Type hex or ASCII to send…"
+                                text:    "Type hex (AA BB CC) or ASCII to send…"
                                 color:   ThemeManager.textDisabled
                                 font:    parent.font
                                 anchors { left: parent.left; verticalCenter: parent.verticalCenter }
@@ -151,18 +178,60 @@ Item {
                     }
 
                     Rectangle {
-                        width:  80; height: AppStyle.inputHeight
+                        id: sendBtn
+                        width: 80; height: AppStyle.inputHeight
                         radius: AppStyle.radiusMd
-                        color:  ThemeManager.accent
+                        color: SerialVM.portOpen ? ThemeManager.accent : ThemeManager.border
+                        Behavior on color { ColorAnimation { duration: AppStyle.animFast } }
+
+                        function doSend() {
+                            if (SerialVM.portOpen && sendInput.text.length > 0) {
+                                SerialVM.send(sendInput.text)
+                                sendInput.text = ""
+                            }
+                        }
+
                         Text {
                             anchors.centerIn: parent
-                            text:  Icons.send + " Send"
-                            color: "#FFFFFF"
+                            text: Icons.send + " Send"; color: "#FFF"
                             font { pixelSize: AppStyle.fontBase; family: AppStyle.fontFamily }
                         }
-                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor }
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: sendBtn.doSend()
+                        }
                     }
                 }
+            }
+        }
+    }
+
+    // ── Config field component ────────────────────────────────
+    component ConfigField: Rectangle {
+        property alias text:        _ci.text
+        property string placeholder: ""
+        signal textChanged()
+
+        Layout.fillWidth: true
+        height: AppStyle.inputHeight
+        radius: AppStyle.radiusMd
+        color:  ThemeManager.background
+        border { color: _ci.activeFocus ? ThemeManager.borderFocus : ThemeManager.border; width: 1 }
+
+        TextInput {
+            id: _ci
+            anchors { fill: parent; leftMargin: AppStyle.spaceSm + AppStyle.spaceXs; rightMargin: AppStyle.spaceSm }
+            color: ThemeManager.text
+            font { pixelSize: AppStyle.fontBase; family: AppStyle.fontFamily }
+            clip: true
+            onTextChanged: parent.textChanged()
+            Text {
+                visible: !parent.text && !parent.activeFocus
+                text:    parent.parent.placeholder
+                color:   ThemeManager.textDisabled
+                font:    parent.font
+                anchors { left: parent.left; verticalCenter: parent.verticalCenter }
             }
         }
     }

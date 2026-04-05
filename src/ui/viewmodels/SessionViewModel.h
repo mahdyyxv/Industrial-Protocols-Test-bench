@@ -6,6 +6,8 @@
 
 namespace rtu::ui {
 
+class ModbusController;
+
 // ──────────────────────────────────────────────────────────────
 // SessionViewModel  (stub — Core Engineer fills implementation)
 //
@@ -42,6 +44,9 @@ signals:
     void sessionStateChanged();
     void dataChanged();
     void errorOccurred(const QString& message);
+
+private:
+    ModbusController* m_modbus { nullptr };
 };
 
 } // namespace rtu::ui

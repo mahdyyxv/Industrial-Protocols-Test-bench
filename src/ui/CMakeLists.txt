@@ -5,6 +5,17 @@ qt_add_library(rtu_ui STATIC
     viewmodels/SessionViewModel.cpp
     viewmodels/NavigationViewModel.h
     viewmodels/NavigationViewModel.cpp
+    # ── Integration controllers ────────────────────────────────
+    viewmodels/ModbusController.h
+    viewmodels/ModbusController.cpp
+    viewmodels/IECController.h
+    viewmodels/IECController.cpp
+    viewmodels/SerialController.h
+    viewmodels/SerialController.cpp
+    viewmodels/AnalyzerController.h
+    viewmodels/AnalyzerController.cpp
+    viewmodels/SimulatorController.h
+    viewmodels/SimulatorController.cpp
 )
 
 # ── QML Singletons ────────────────────────────────────────────
@@ -55,4 +66,5 @@ target_link_libraries(rtu_ui PUBLIC
     Qt6::Quick
     Qt6::QuickControls2
     rtu_services
+    rtu_core
 )

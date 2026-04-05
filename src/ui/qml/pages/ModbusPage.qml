@@ -6,30 +6,26 @@ import rtu.ui
 // ─────────────────────────────────────────────────────────────
 // ModbusPage
 //
-// UI for Modbus RTU / TCP testing.
-// Binds to SessionVM (stub) — no protocol logic here.
-//
-// Layout:
-//   Left panel:  Connection config + Request builder
-//   Right panel: Response table + Raw log
+// Binds to ModbusVM (ModbusController context property).
+// Left panel:  Connection config + Request builder
+// Right panel: Response table + Raw log
 // ─────────────────────────────────────────────────────────────
 Item {
     id: root
 
-    // pageId injected by StackView on push
     property string pageId: "modbus_rtu"
     readonly property bool isTCP: pageId === "modbus_tcp"
+
+    // Keep ModbusVM mode in sync with the page variant
+    Component.onCompleted: ModbusVM.mode = isTCP ? "TCP" : "RTU"
 
     Rectangle { anchors.fill: parent; color: ThemeManager.background }
 
     RowLayout {
-        anchors {
-            fill:    parent
-            margins: AppStyle.contentPadding
-        }
+        anchors { fill: parent; margins: AppStyle.contentPadding }
         spacing: AppStyle.spaceMd
 
-        // ── LEFT: Config + Request ────────────────────────
+        // ── LEFT: Config + Request ────────────────────────────
         ColumnLayout {
             Layout.preferredWidth: 320
             Layout.fillHeight:     true
@@ -48,7 +44,6 @@ Item {
                     anchors { fill: parent; margins: AppStyle.spaceMd + AppStyle.spaceXs }
                     spacing: AppStyle.spaceMd
 
-                    // Card title row
                     RowLayout {
                         Text {
                             text:  "Connection"
@@ -57,69 +52,79 @@ Item {
                             Layout.fillWidth: true
                         }
                         StatusBadge {
-                            status: "disconnected"  // bind: SessionVM.connectionStatus
+                            status: ModbusVM.connected ? "connected" : "disconnected"
                         }
                     }
 
-                    // ── Serial port (RTU only) ────────────
+                    // ── Serial port fields (RTU only) ─────────
                     ColumnLayout {
                         visible: !root.isTCP
                         Layout.fillWidth: true
                         spacing: AppStyle.spaceXs
 
-                        Text {
-                            text:  "Port"
-                            color: ThemeManager.textSecondary
-                            font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily }
+                        Text { text: "Port"; color: ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
+                        InputField {
+                            id: portField
+                            placeholder: "COM1"
+                            text: ModbusVM.portName
+                            onTextChanged: ModbusVM.portName = text
+                            Layout.fillWidth: true
                         }
-                        InputField { placeholder: "COM1"; Layout.fillWidth: true }
 
-                        Text {
-                            text:  "Baud Rate"
-                            color: ThemeManager.textSecondary
-                            font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily }
+                        Text { text: "Baud Rate"; color: ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
+                        InputField {
+                            id: baudField
+                            placeholder: "9600"
+                            text: ModbusVM.baudRate
+                            onTextChanged: { const v = parseInt(text); if (!isNaN(v)) ModbusVM.baudRate = v }
+                            Layout.fillWidth: true
                         }
-                        InputField { placeholder: "9600"; Layout.fillWidth: true }
                     }
 
-                    // ── TCP host / port ───────────────────
+                    // ── TCP host / port ───────────────────────
                     ColumnLayout {
                         visible: root.isTCP
                         Layout.fillWidth: true
                         spacing: AppStyle.spaceXs
 
-                        Text {
-                            text:  "Host"
-                            color: ThemeManager.textSecondary
-                            font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily }
+                        Text { text: "Host"; color: ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
+                        InputField {
+                            id: hostField
+                            placeholder: "192.168.1.1"
+                            text: ModbusVM.host
+                            onTextChanged: ModbusVM.host = text
+                            Layout.fillWidth: true
                         }
-                        InputField { placeholder: "192.168.1.1"; Layout.fillWidth: true }
 
-                        Text {
-                            text:  "Port"
-                            color: ThemeManager.textSecondary
-                            font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily }
+                        Text { text: "Port"; color: ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
+                        InputField {
+                            id: tcpPortField
+                            placeholder: "502"
+                            text: ModbusVM.port
+                            onTextChanged: { const v = parseInt(text); if (!isNaN(v)) ModbusVM.port = v }
+                            Layout.fillWidth: true
                         }
-                        InputField { placeholder: "502"; Layout.fillWidth: true }
                     }
 
-                    // ── Slave / Unit ID ───────────────────
+                    // ── Unit ID ───────────────────────────────
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: AppStyle.spaceXs
-                        Text {
-                            text:  "Unit ID"
-                            color: ThemeManager.textSecondary
-                            font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily }
+                        Text { text: "Unit ID"; color: ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
+                        InputField {
+                            id: unitIdField
+                            placeholder: "1"
+                            text: ModbusVM.slaveId
+                            onTextChanged: { const v = parseInt(text); if (!isNaN(v)) ModbusVM.slaveId = v }
+                            Layout.fillWidth: true
                         }
-                        InputField { placeholder: "1"; Layout.fillWidth: true }
                     }
 
-                    // Connect / Disconnect button
                     ActionButton {
                         Layout.fillWidth: true
-                        label: "Connect"   // bind: SessionVM.isConnected ? "Disconnect" : "Connect"
+                        label: ModbusVM.connected ? "Disconnect" : "Connect"
                         isPrimary: true
+                        onClicked: ModbusVM.connect()
                     }
                 }
             }
@@ -142,17 +147,14 @@ Item {
                         font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: 600 }
                     }
 
-                    // Function code selector
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: AppStyle.spaceXs
-                        Text {
-                            text:  "Function Code"
-                            color: ThemeManager.textSecondary
-                            font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily }
-                        }
+                        Text { text: "Function Code"; color: ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
                         InputField {
-                            placeholder: "03 - Read Holding Registers"
+                            id: fcField
+                            placeholder: "3 - Read Holding Registers"
+                            text: "3"
                             Layout.fillWidth: true
                         }
                     }
@@ -164,23 +166,15 @@ Item {
                         ColumnLayout {
                             spacing: AppStyle.spaceXs
                             Layout.fillWidth: true
-                            Text {
-                                text:  "Start Address"
-                                color: ThemeManager.textSecondary
-                                font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily }
-                            }
-                            InputField { placeholder: "0"; Layout.fillWidth: true }
+                            Text { text: "Start Address"; color: ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
+                            InputField { id: addrField; placeholder: "0"; text: "0"; Layout.fillWidth: true }
                         }
 
                         ColumnLayout {
                             spacing: AppStyle.spaceXs
                             Layout.fillWidth: true
-                            Text {
-                                text:  "Count"
-                                color: ThemeManager.textSecondary
-                                font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily }
-                            }
-                            InputField { placeholder: "10"; Layout.fillWidth: true }
+                            Text { text: "Count / Value"; color: ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
+                            InputField { id: countField; placeholder: "10"; text: "10"; Layout.fillWidth: true }
                         }
                     }
 
@@ -190,13 +184,22 @@ Item {
                         Layout.fillWidth: true
                         label:     Icons.send + "  Send Request"
                         isPrimary: true
-                        // onClicked: SessionVM.sendRequest(...)
+                        enabled:   ModbusVM.connected
+                        onClicked: {
+                            const fc = parseInt(fcField.text) || 3
+                            const addr = parseInt(addrField.text) || 0
+                            const cnt  = parseInt(countField.text) || 10
+                            if (fc === 6)
+                                ModbusVM.write(addr, cnt)
+                            else
+                                ModbusVM.read(addr, cnt)
+                        }
                     }
                 }
             }
         }
 
-        // ── RIGHT: Response + Log ─────────────────────────
+        // ── RIGHT: Response + Log ─────────────────────────────
         ColumnLayout {
             Layout.fillWidth:  true
             Layout.fillHeight: true
@@ -221,7 +224,11 @@ Item {
                             font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: 600 }
                             Layout.fillWidth: true
                         }
-                        ActionButton { label: Icons.clear + "  Clear"; isPrimary: false }
+                        ActionButton {
+                            label: Icons.clear + "  Clear"
+                            isPrimary: false
+                            onClicked: ModbusVM.clearLog()
+                        }
                     }
 
                     // Table header
@@ -230,16 +237,13 @@ Item {
                         height: 32
                         color:  ThemeManager.background
                         radius: AppStyle.radiusSm
-
                         RowLayout {
                             anchors { fill: parent; leftMargin: AppStyle.spaceMd; rightMargin: AppStyle.spaceMd }
                             spacing: 0
-
                             Repeater {
                                 model: ["Address", "Value (Dec)", "Value (Hex)", "Value (Bin)"]
                                 delegate: Text {
-                                    text:  modelData
-                                    color: ThemeManager.textSecondary
+                                    text: modelData; color: ThemeManager.textSecondary
                                     font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily; weight: 500 }
                                     Layout.fillWidth: true
                                 }
@@ -247,13 +251,31 @@ Item {
                         }
                     }
 
-                    // Table rows (bind to SessionVM.responseModel)
-                    Rectangle {
+                    // Table rows
+                    ListView {
                         Layout.fillWidth:  true
                         Layout.fillHeight: true
-                        color: "transparent"
+                        model:  ModbusVM.responseModel
+                        clip:   true
+
+                        delegate: Rectangle {
+                            required property var modelData
+                            width:  ListView.view.width
+                            height: 28
+                            color:  index % 2 === 0 ? "transparent" : Qt.rgba(ThemeManager.text.r, ThemeManager.text.g, ThemeManager.text.b, 0.03)
+
+                            RowLayout {
+                                anchors { fill: parent; leftMargin: AppStyle.spaceMd; rightMargin: AppStyle.spaceMd }
+                                spacing: 0
+                                Text { text: modelData.address ?? ""; color: ThemeManager.text; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontMono; Layout.fillWidth: true }
+                                Text { text: modelData.dec     ?? ""; color: ThemeManager.text; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontMono; Layout.fillWidth: true }
+                                Text { text: modelData.hex     ?? ""; color: ThemeManager.accent; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontMono; Layout.fillWidth: true }
+                                Text { text: modelData.bin     ?? ""; color: ThemeManager.textSecondary; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontMono; Layout.fillWidth: true }
+                            }
+                        }
 
                         Text {
+                            visible: parent.count === 0
                             anchors.centerIn: parent
                             text:  "Response will appear here after sending a request."
                             color: ThemeManager.textDisabled
@@ -263,7 +285,7 @@ Item {
                 }
             }
 
-            // Raw hex log
+            // Raw log
             Rectangle {
                 Layout.fillWidth:   true
                 Layout.preferredHeight: 160
@@ -277,13 +299,11 @@ Item {
 
                     RowLayout {
                         Text {
-                            text:  "Raw Log"
-                            color: ThemeManager.text
+                            text: "Raw Log"; color: ThemeManager.text
                             font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: 600 }
                             Layout.fillWidth: true
                         }
-                        ActionButton { label: Icons.copy; isPrimary: false }
-                        ActionButton { label: Icons.clear; isPrimary: false }
+                        ActionButton { label: Icons.clear; isPrimary: false; onClicked: ModbusVM.clearLog() }
                     }
 
                     Rectangle {
@@ -292,12 +312,31 @@ Item {
                         radius: AppStyle.radiusSm
                         color:  ThemeManager.background
 
-                        Text {
+                        ListView {
                             anchors { fill: parent; margins: AppStyle.spaceSm }
-                            text:  "→ Ready\n← Waiting for response…"
-                            color: ThemeManager.textSecondary
-                            font { pixelSize: AppStyle.fontSm; family: AppStyle.fontMono }
-                            wrapMode: Text.WrapAnywhere
+                            model: ModbusVM.rawLog
+                            clip:  true
+                            verticalLayoutDirection: ListView.BottomToTop
+
+                            delegate: Text {
+                                required property string modelData
+                                width: ListView.view.width
+                                text:  modelData
+                                color: modelData.startsWith("✗") ? "#FF5555"
+                                     : modelData.startsWith("→") ? ThemeManager.accent
+                                     : ThemeManager.textSecondary
+                                font { pixelSize: AppStyle.fontSm; family: AppStyle.fontMono }
+                                wrapMode: Text.WrapAnywhere
+                            }
+
+                            Text {
+                                visible: parent.count === 0
+                                anchors.centerIn: parent
+                                text:  "→ Ready\n← Waiting for response…"
+                                color: ThemeManager.textSecondary
+                                font { pixelSize: AppStyle.fontSm; family: AppStyle.fontMono }
+                                horizontalAlignment: Text.AlignHCenter
+                            }
                         }
                     }
                 }
@@ -305,9 +344,41 @@ Item {
         }
     }
 
+    // Error toast
+    Rectangle {
+        id: errorToast
+        visible: false
+        anchors { bottom: parent.bottom; horizontalCenter: parent.horizontalCenter; bottomMargin: AppStyle.spaceLg }
+        width:  errorText.implicitWidth + AppStyle.spaceLg * 2
+        height: AppStyle.buttonHeightSm
+        radius: AppStyle.radiusMd
+        color:  "#CC2222"
+
+        Text {
+            id: errorText
+            anchors.centerIn: parent
+            color: "#FFF"
+            font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily }
+        }
+
+        Timer { id: toastTimer; interval: 3000; onTriggered: errorToast.visible = false }
+    }
+
+    Connections {
+        target: ModbusVM
+        function onErrorOccurred(msg) {
+            errorText.text = msg
+            errorToast.visible = true
+            toastTimer.restart()
+        }
+    }
+
     // ── Inline helper components ──────────────────────────────
     component InputField: Rectangle {
+        property alias text:        _input.text
         property string placeholder: ""
+        signal textChanged()
+
         height: AppStyle.inputHeight
         radius: AppStyle.radiusMd
         color:  ThemeManager.background
@@ -319,6 +390,7 @@ Item {
             color: ThemeManager.text
             font { pixelSize: AppStyle.fontBase; family: AppStyle.fontFamily }
             clip: true
+            onTextChanged: parent.textChanged()
             Text {
                 visible: !parent.text && !parent.activeFocus
                 text:    parent.parent.placeholder
@@ -332,11 +404,13 @@ Item {
     component ActionButton: Rectangle {
         property string label:     ""
         property bool   isPrimary: true
+        property bool   enabled:   true
         signal clicked()
 
         implicitWidth:  _btnText.implicitWidth + AppStyle.spaceLg * 2
         implicitHeight: AppStyle.buttonHeightSm
         radius: AppStyle.radiusMd
+        opacity: enabled ? 1.0 : 0.4
         color: {
             if (isPrimary) return _btnHover.containsMouse ? ThemeManager.accentHover : ThemeManager.accent
             return _btnHover.containsMouse
@@ -353,13 +427,12 @@ Item {
             color: isPrimary ? "#FFFFFF" : ThemeManager.textSecondary
             font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily }
         }
-
         MouseArea {
             id: _btnHover
             anchors.fill: parent
             hoverEnabled: true
-            cursorShape:  Qt.PointingHandCursor
-            onClicked:    parent.clicked()
+            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+            onClicked: if (parent.enabled) parent.clicked()
         }
     }
 }

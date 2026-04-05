@@ -124,3 +124,19 @@ if(libmodbus_FOUND)
         ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
     )
 endif()
+
+# ── Controller integration tests (GoogleTest) ────────────────
+add_executable(tst_integration tst_integration.cpp)
+target_include_directories(tst_integration PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(tst_integration PRIVATE
+    GTest::gtest
+    GTest::gmock
+    Qt6::Core
+    Qt6::Test
+    rtu_core
+    rtu_ui
+)
+add_test(NAME tst_integration COMMAND tst_integration)
+set_tests_properties(tst_integration PROPERTIES
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+)

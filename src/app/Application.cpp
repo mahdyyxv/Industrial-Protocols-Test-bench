@@ -4,8 +4,12 @@
 #include <QtQml/QQmlExtensionPlugin>
 #include "utils/Logger.h"
 
-// Stub ViewModels — concrete implementations added in Integration phase
 #include "ui/viewmodels/AppViewModel.h"
+#include "ui/viewmodels/ModbusController.h"
+#include "ui/viewmodels/IECController.h"
+#include "ui/viewmodels/SerialController.h"
+#include "ui/viewmodels/AnalyzerController.h"
+#include "ui/viewmodels/SimulatorController.h"
 #include "services/ServiceLocator.h"
 #include "services/dev/StubAuthService.h"
 #include "services/dev/StubSubscriptionService.h"
@@ -62,9 +66,20 @@ void Application::initServices()
 
 void Application::registerQmlTypes()
 {
-    // ViewModels exposed as context properties so QML can use "AppVM.*"
+    auto* ctx = m_engine.rootContext();
+
+    // Auth / subscription
     auto* appVM = new ui::AppViewModel(&m_engine);
-    m_engine.rootContext()->setContextProperty(QStringLiteral("AppVM"), appVM);
+    ctx->setContextProperty(QStringLiteral("AppVM"), appVM);
+
+    // Protocol controllers — one instance each, alive for app lifetime
+    ctx->setContextProperty(QStringLiteral("ModbusVM"),    new ui::ModbusController(&m_engine));
+    ctx->setContextProperty(QStringLiteral("IECVM"),       new ui::IECController(&m_engine));
+    ctx->setContextProperty(QStringLiteral("SerialVM"),    new ui::SerialController(&m_engine));
+    ctx->setContextProperty(QStringLiteral("AnalyzerVM"),  new ui::AnalyzerController(&m_engine));
+    ctx->setContextProperty(QStringLiteral("SimulatorVM"), new ui::SimulatorController(&m_engine));
+
+    qCInfo(rtuApp) << "All controllers registered with QML engine";
 }
 
 } // namespace rtu
