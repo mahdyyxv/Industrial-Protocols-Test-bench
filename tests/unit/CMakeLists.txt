@@ -125,6 +125,21 @@ if(libmodbus_FOUND)
     )
 endif()
 
+# ── Server mode tests (GoogleTest) ───────────────────────────
+add_executable(tst_server_modes tst_server_modes.cpp)
+target_include_directories(tst_server_modes PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(tst_server_modes PRIVATE
+    GTest::gtest
+    GTest::gmock
+    Qt6::Core
+    Qt6::Test
+    rtu_core
+)
+add_test(NAME tst_server_modes COMMAND tst_server_modes)
+set_tests_properties(tst_server_modes PROPERTIES
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+)
+
 # ── Controller integration tests (GoogleTest) ────────────────
 add_executable(tst_integration tst_integration.cpp)
 target_include_directories(tst_integration PRIVATE ${CMAKE_SOURCE_DIR}/src)

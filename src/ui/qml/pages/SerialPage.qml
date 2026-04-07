@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import rtu.ui
 
 // ─────────────────────────────────────────────────────────────
@@ -26,10 +27,24 @@ Item {
                 anchors { fill: parent; margins: AppStyle.spaceMd + AppStyle.spaceXs }
                 spacing: AppStyle.spaceMd
 
-                Text {
-                    text:  "Serial Port"
-                    color: ThemeManager.text
-                    font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: 600 }
+                RowLayout {
+                    Text { text: "Serial Port"; color: ThemeManager.text; font.pixelSize: AppStyle.fontMd; font.family: AppStyle.fontFamily; font.weight: 600; Layout.fillWidth: true }
+                    StatusBadge { status: SerialVM.portOpen ? "connected" : "disconnected" }
+                }
+
+                // Role
+                ColumnLayout { Layout.fillWidth: true; spacing: AppStyle.spaceXs
+                    Text { text: "Role"; color: ThemeManager.textSecondary; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontFamily }
+                    ComboBox {
+                        id: serialRoleCombo
+                        Layout.fillWidth: true
+                        model: ["Master", "Slave"]
+                        currentIndex: SerialVM.role === "Slave" ? 1 : 0
+                        enabled: !SerialVM.portOpen
+                        onActivated: SerialVM.role = currentText
+                        background: Rectangle { color: ThemeManager.background; radius: AppStyle.radiusMd; border { color: ThemeManager.border; width: 1 } }
+                        contentItem: Text { leftPadding: AppStyle.spaceSm + AppStyle.spaceXs; text: serialRoleCombo.displayText; color: ThemeManager.text; font.pixelSize: AppStyle.fontBase; font.family: AppStyle.fontFamily; verticalAlignment: Text.AlignVCenter }
+                    }
                 }
 
                 // Port

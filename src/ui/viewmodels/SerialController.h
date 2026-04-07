@@ -21,6 +21,7 @@ class SerialController : public QObject {
     Q_OBJECT
 
     Q_PROPERTY(bool       portOpen      READ portOpen      NOTIFY portOpenChanged)
+    Q_PROPERTY(QString    role          READ role          WRITE setRole      NOTIFY roleChanged)
     Q_PROPERTY(QString    portName      READ portName      WRITE setPortName  NOTIFY configChanged)
     Q_PROPERTY(int        baudRate      READ baudRate      WRITE setBaudRate  NOTIFY configChanged)
     Q_PROPERTY(int        dataBits      READ dataBits      WRITE setDataBits  NOTIFY configChanged)
@@ -34,6 +35,7 @@ public:
     ~SerialController() override;
 
     bool       portOpen()      const;
+    QString    role()          const;
     QString    portName()      const;
     int        baudRate()      const;
     int        dataBits()      const;
@@ -42,6 +44,7 @@ public:
     QString    lastError()     const;
     QStringList terminalLines()const;
 
+    void setRole    (const QString& v);
     void setPortName(const QString& v);
     void setBaudRate(int v);
     void setDataBits(int v);
@@ -65,6 +68,7 @@ public:
 
 signals:
     void portOpenChanged();
+    void roleChanged();
     void configChanged();
     void terminalChanged();
     void dataReceived(const QString& hex);
@@ -75,6 +79,7 @@ private:
     void setLastError(const QString& err);
 
     bool        m_portOpen  { false };
+    QString     m_role      { QStringLiteral("Master") };
     QString     m_portName  { QStringLiteral("COM1") };
     int         m_baudRate  { 9600 };
     int         m_dataBits  { 8 };

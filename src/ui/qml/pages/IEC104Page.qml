@@ -7,9 +7,11 @@ import rtu.ui
 // IEC104Page  (Pro)
 //
 // Binds to IECVM (IECController context property).
+// Supports Client (connect to outstation) and Server (listen) roles.
 // ─────────────────────────────────────────────────────────────
 Item {
     property string pageId: "iec104"
+    readonly property bool isServer: IECVM.role === "Server"
 
     readonly property var _titles: ({
         "iec104": "IEC 60870-5-104",
@@ -53,30 +55,74 @@ Item {
                             StatusBadge { status: IECVM.connected ? "connected" : "disconnected" }
                         }
 
-                        ColumnLayout { Layout.fillWidth: true; spacing: AppStyle.spaceXs
-                            Text { text: "Host"; color: ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
-                            IecField { placeholder: "192.168.1.100"; text: IECVM.host; onTextChanged: IECVM.host = text }
+                        // ── Role selector ─────────────────────
+                        ColumnLayout {
+                            Layout.fillWidth: true; spacing: AppStyle.spaceXs
+                            Text { text: "Role"; color: ThemeManager.textSecondary; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontFamily }
+                            ComboBox {
+                                id: iecRoleCombo
+                                Layout.fillWidth: true
+                                model: ["Client", "Server"]
+                                currentIndex: IECVM.role === "Server" ? 1 : 0
+                                enabled: !IECVM.connected
+                                onActivated: IECVM.role = currentText
+                                background: Rectangle {
+                                    color: ThemeManager.background; radius: AppStyle.radiusMd
+                                    border { color: ThemeManager.border; width: 1 }
+                                }
+                                contentItem: Text {
+                                    leftPadding: AppStyle.spaceSm + AppStyle.spaceXs
+                                    text: iecRoleCombo.displayText; color: ThemeManager.text
+                                    font.pixelSize: AppStyle.fontBase; font.family: AppStyle.fontFamily
+                                    verticalAlignment: Text.AlignVCenter
+                                }
+                            }
                         }
-                        ColumnLayout { Layout.fillWidth: true; spacing: AppStyle.spaceXs
-                            Text { text: "Port"; color: ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
+
+                        // ── Client: host / port ───────────────
+                        ColumnLayout {
+                            visible: !isServer
+                            Layout.fillWidth: true; spacing: AppStyle.spaceXs
+                            Text { text: "Host"; color: ThemeManager.textSecondary; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontFamily }
+                            IecField { placeholder: "192.168.1.100"; text: IECVM.host; onTextChanged: IECVM.host = text }
+                            Text { text: "Port"; color: ThemeManager.textSecondary; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontFamily }
                             IecField { placeholder: "2404"; text: IECVM.port; onTextChanged: { const v = parseInt(text); if (!isNaN(v)) IECVM.port = v } }
                         }
-                        ColumnLayout { Layout.fillWidth: true; spacing: AppStyle.spaceXs
-                            Text { text: "Common Address"; color: ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
+
+                        // ── Server: listen port ───────────────
+                        ColumnLayout {
+                            visible: isServer
+                            Layout.fillWidth: true; spacing: AppStyle.spaceXs
+                            Text { text: "Listen Port"; color: ThemeManager.textSecondary; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontFamily }
+                            IecField { placeholder: "2404"; text: IECVM.listenPort; onTextChanged: { const v = parseInt(text); if (!isNaN(v)) IECVM.listenPort = v } }
+                            Text { text: "Clients: " + IECVM.clientCount; color: ThemeManager.textSecondary; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontFamily }
+                        }
+
+                        // ── Common Address ────────────────────
+                        ColumnLayout {
+                            Layout.fillWidth: true; spacing: AppStyle.spaceXs
+                            Text { text: "Common Address"; color: ThemeManager.textSecondary; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontFamily }
                             IecField { placeholder: "1"; text: IECVM.commonAddress; onTextChanged: { const v = parseInt(text); if (!isNaN(v)) IECVM.commonAddress = v } }
                         }
 
-                        // State text
-                        Text { text: IECVM.stateText; color: ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
+                        Text { text: IECVM.stateText; color: ThemeManager.textSecondary; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontFamily }
 
-                        IecButton { label: IECVM.connected ? "Disconnect" : "Connect"; isPrimary: true; Layout.fillWidth: true; onClicked: IECVM.connected ? IECVM.disconnectDevice() : IECVM.connectDevice() }
+                        IecButton {
+                            label: IECVM.connected
+                                   ? (isServer ? "Stop Server" : "Disconnect")
+                                   : (isServer ? "Start Server" : "Connect")
+                            isPrimary: true
+                            Layout.fillWidth: true
+                            onClicked: IECVM.connected ? IECVM.disconnectDevice() : IECVM.connectDevice()
+                        }
                     }
                 }
 
-                // Session control card
+                // ── Client: session control card ──────────────
                 Rectangle {
                     Layout.fillWidth:  true
                     implicitHeight:    ctrlCol.implicitHeight + AppStyle.spaceLg * 2
+                    visible: !isServer
                     radius: AppStyle.radiusLg
                     color:  ThemeManager.surface
                     border { color: ThemeManager.border; width: 1 }
@@ -86,7 +132,7 @@ Item {
                         anchors { fill: parent; margins: AppStyle.spaceMd + AppStyle.spaceXs }
                         spacing: AppStyle.spaceSm
 
-                        Text { text: "Session Control"; color: ThemeManager.text; font { pixelSize: AppStyle.fontMd; family: AppStyle.fontFamily; weight: 600 } }
+                        Text { text: "Session Control"; color: ThemeManager.text; font.pixelSize: AppStyle.fontMd; font.family: AppStyle.fontFamily; font.weight: 600 }
 
                         IecButton { label: "STARTDT"; Layout.fillWidth: true; isPrimary: false; isEnabled: IECVM.connected; onClicked: IECVM.sendStartDT() }
                         IecButton { label: "STOPDT";  Layout.fillWidth: true; isPrimary: false; isEnabled: IECVM.connected; onClicked: IECVM.sendStopDT() }
@@ -95,10 +141,52 @@ Item {
                     }
                 }
 
+                // ── Server: set IOA card ──────────────────────
+                Rectangle {
+                    Layout.fillWidth:  true
+                    implicitHeight:    setIoaCol.implicitHeight + AppStyle.spaceLg * 2
+                    visible: isServer
+                    radius: AppStyle.radiusLg
+                    color:  ThemeManager.surface
+                    border { color: ThemeManager.border; width: 1 }
+
+                    ColumnLayout {
+                        id: setIoaCol
+                        anchors { fill: parent; margins: AppStyle.spaceMd + AppStyle.spaceXs }
+                        spacing: AppStyle.spaceMd
+
+                        Text { text: "Update IOA"; color: ThemeManager.text; font.pixelSize: AppStyle.fontMd; font.family: AppStyle.fontFamily; font.weight: 600 }
+                        RowLayout {
+                            Layout.fillWidth: true; spacing: AppStyle.spaceSm
+                            ColumnLayout {
+                                spacing: AppStyle.spaceXs; Layout.fillWidth: true
+                                Text { text: "IOA"; color: ThemeManager.textSecondary; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontFamily }
+                                IecField { id: ioaAddrField; placeholder: "100"; text: "100" }
+                            }
+                            ColumnLayout {
+                                spacing: AppStyle.spaceXs; Layout.fillWidth: true
+                                Text { text: "Float Value"; color: ThemeManager.textSecondary; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontFamily }
+                                IecField { id: ioaValField; placeholder: "0.0"; text: "0.0" }
+                            }
+                        }
+                        IecButton {
+                            label: "Send Spontaneous"
+                            isPrimary: true
+                            Layout.fillWidth: true
+                            isEnabled: IECVM.connected
+                            onClicked: {
+                                const ioa = parseInt(ioaAddrField.text) || 100
+                                const val = parseFloat(ioaValField.text) || 0.0
+                                IECVM.setServerIOA(ioa, val)
+                            }
+                        }
+                    }
+                }
+
                 Item { Layout.fillHeight: true }
             }
 
-            // ── RIGHT: Data point table ───────────────────────
+            // ── RIGHT: Data points / Server IOAs ──────────────
             Rectangle {
                 Layout.fillWidth:  true
                 Layout.fillHeight: true
@@ -110,7 +198,11 @@ Item {
                     anchors { fill: parent; margins: AppStyle.spaceMd + AppStyle.spaceXs }
                     spacing: AppStyle.spaceMd
 
-                    Text { text: _titles[pageId] ?? "Protocol"; color: ThemeManager.text; font { pixelSize: AppStyle.fontXl; family: AppStyle.fontFamily; weight: 600 } }
+                    Text {
+                        text: isServer ? "IOA State" : (_titles[pageId] ?? "Protocol")
+                        color: ThemeManager.text
+                        font.pixelSize: AppStyle.fontXl; font.family: AppStyle.fontFamily; font.weight: 600
+                    }
 
                     // Table header
                     Rectangle {
@@ -119,47 +211,51 @@ Item {
                         RowLayout {
                             anchors { fill: parent; leftMargin: AppStyle.spaceMd; rightMargin: AppStyle.spaceMd }
                             Repeater {
-                                model: ["IOA", "Type", "Value", "Quality", "COT", "Timestamp"]
+                                model: isServer ? ["IOA", "Value"]
+                                                : ["IOA", "Type", "Value", "Quality", "COT", "Timestamp"]
                                 delegate: Text {
                                     text: modelData; color: ThemeManager.textSecondary
-                                    font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily; weight: 500 }
+                                    font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontFamily; font.weight: 500
                                     Layout.fillWidth: true
                                 }
                             }
                         }
                     }
 
-                    // Data point rows
+                    // Rows
                     ListView {
                         Layout.fillWidth:  true
                         Layout.fillHeight: true
-                        model: IECVM.dataPoints
+                        model: isServer ? IECVM.serverIOAs : IECVM.dataPoints
                         clip:  true
 
                         delegate: Rectangle {
                             required property var modelData
                             width:  ListView.view.width
                             height: 28
-                            color: index % 2 === 0 ? "transparent" : Qt.rgba(ThemeManager.text.r, ThemeManager.text.g, ThemeManager.text.b, 0.03)
+                            color: index % 2 === 0 ? "transparent"
+                                 : Qt.rgba(ThemeManager.text.r, ThemeManager.text.g, ThemeManager.text.b, 0.03)
 
                             RowLayout {
                                 anchors { fill: parent; leftMargin: AppStyle.spaceMd; rightMargin: AppStyle.spaceMd }
-                                Text { text: modelData.ioa       ?? ""; color: ThemeManager.accent; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontMono; Layout.fillWidth: true }
-                                Text { text: modelData.typeName  ?? ""; color: ThemeManager.text;   font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontFamily; Layout.fillWidth: true }
-                                Text { text: modelData.value     ?? ""; color: ThemeManager.text;   font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontMono; Layout.fillWidth: true }
-                                Text { text: modelData.quality   ?? ""; color: ThemeManager.textSecondary; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontMono; Layout.fillWidth: true }
-                                Text { text: modelData.cot       ?? ""; color: ThemeManager.textSecondary; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontMono; Layout.fillWidth: true }
-                                Text { text: modelData.timestamp ?? ""; color: ThemeManager.textSecondary; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontFamily; Layout.fillWidth: true }
+                                Text { text: modelData.ioa       ?? ""; color: ThemeManager.accent;        font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontMono;   Layout.fillWidth: true }
+                                Text { visible: !isServer; text: modelData.typeName  ?? ""; color: ThemeManager.text;          font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontFamily; Layout.fillWidth: true }
+                                Text { text: modelData.value     ?? ""; color: ThemeManager.text;          font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontMono;   Layout.fillWidth: true }
+                                Text { visible: !isServer; text: modelData.quality   ?? ""; color: ThemeManager.textSecondary; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontMono;   Layout.fillWidth: true }
+                                Text { visible: !isServer; text: modelData.cot       ?? ""; color: ThemeManager.textSecondary; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontMono;   Layout.fillWidth: true }
+                                Text { visible: !isServer; text: modelData.timestamp ?? ""; color: ThemeManager.textSecondary; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontFamily; Layout.fillWidth: true }
                             }
                         }
 
                         Text {
                             visible: parent.count === 0
                             anchors.centerIn: parent
-                            text: IECVM.connected ? "No data points received yet.\nSend an Interrogation command."
-                                                  : "Connect to an outstation to begin."
+                            text: isServer
+                                  ? (IECVM.connected ? "No IOA values set.\nUse 'Update IOA' to push spontaneous data." : "Start server to see IOA state.")
+                                  : (IECVM.connected ? "No data points received yet.\nSend an Interrogation command."
+                                                     : "Connect to an outstation to begin.")
                             color: ThemeManager.textDisabled
-                            font { pixelSize: AppStyle.fontBase; family: AppStyle.fontFamily }
+                            font.pixelSize: AppStyle.fontBase; font.family: AppStyle.fontFamily
                             horizontalAlignment: Text.AlignHCenter
                         }
                     }
@@ -174,7 +270,7 @@ Item {
         anchors { bottom: parent.bottom; horizontalCenter: parent.horizontalCenter; bottomMargin: AppStyle.spaceLg }
         width: iecToastText.implicitWidth + AppStyle.spaceLg * 2; height: AppStyle.buttonHeightSm
         radius: AppStyle.radiusMd; color: "#CC2222"
-        Text { id: iecToastText; anchors.centerIn: parent; color: "#FFF"; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
+        Text { id: iecToastText; anchors.centerIn: parent; color: "#FFF"; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontFamily }
         Timer { id: iecToastTimer; interval: 3000; onTriggered: iecToast.visible = false }
     }
     Connections {
@@ -204,10 +300,11 @@ Item {
         signal clicked()
         implicitWidth: _ib.implicitWidth + AppStyle.spaceLg * 2; implicitHeight: AppStyle.buttonHeightSm
         radius: AppStyle.radiusMd; opacity: isEnabled ? 1.0 : 0.4
-        color: isPrimary ? (_ibh.containsMouse ? ThemeManager.accentHover : ThemeManager.accent) : (_ibh.containsMouse ? Qt.rgba(ThemeManager.text.r, ThemeManager.text.g, ThemeManager.text.b, 0.08) : "transparent")
+        color: isPrimary ? (_ibh.containsMouse ? ThemeManager.accentHover : ThemeManager.accent)
+                         : (_ibh.containsMouse ? Qt.rgba(ThemeManager.text.r, ThemeManager.text.g, ThemeManager.text.b, 0.08) : "transparent")
         border { color: isPrimary ? "transparent" : ThemeManager.border; width: 1 }
         Behavior on color { ColorAnimation { duration: AppStyle.animFast } }
-        Text { id: _ib; anchors.centerIn: parent; text: label; color: isPrimary ? "#FFF" : ThemeManager.textSecondary; font { pixelSize: AppStyle.fontSm; family: AppStyle.fontFamily } }
+        Text { id: _ib; anchors.centerIn: parent; text: label; color: isPrimary ? "#FFF" : ThemeManager.textSecondary; font.pixelSize: AppStyle.fontSm; font.family: AppStyle.fontFamily }
         MouseArea { id: _ibh; anchors.fill: parent; hoverEnabled: true; cursorShape: isEnabled ? Qt.PointingHandCursor : Qt.ArrowCursor; onClicked: if (parent.isEnabled) parent.clicked() }
     }
 }

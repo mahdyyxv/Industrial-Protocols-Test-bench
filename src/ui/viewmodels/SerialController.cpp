@@ -43,6 +43,7 @@ SerialController::~SerialController() { close(); }
 // ── Accessors ─────────────────────────────────────────────────
 
 bool        SerialController::portOpen()       const { return m_portOpen; }
+QString     SerialController::role()           const { return m_role; }
 QString     SerialController::portName()       const { return m_portName; }
 int         SerialController::baudRate()       const { return m_baudRate; }
 int         SerialController::dataBits()       const { return m_dataBits; }
@@ -53,6 +54,7 @@ QStringList SerialController::terminalLines()  const { return m_terminalLines; }
 
 // ── Setters ───────────────────────────────────────────────────
 
+void SerialController::setRole    (const QString& v) { if (m_role     != v) { m_role     = v; emit roleChanged();   } }
 void SerialController::setPortName(const QString& v) { if (m_portName != v) { m_portName = v; emit configChanged(); } }
 void SerialController::setBaudRate(int v)            { if (m_baudRate != v) { m_baudRate = v; emit configChanged(); } }
 void SerialController::setDataBits(int v)            { if (m_dataBits != v) { m_dataBits = v; emit configChanged(); } }
