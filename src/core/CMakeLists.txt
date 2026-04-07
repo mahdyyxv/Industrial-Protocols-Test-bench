@@ -27,8 +27,9 @@ if(Qt6SerialPort_FOUND)
     target_link_libraries(rtu_core PUBLIC Qt6::SerialPort)
     target_compile_definitions(rtu_core PUBLIC RTU_SERIAL_ENABLED)
 else()
-    message(WARNING "Qt6SerialPort not found — serial module disabled. "
-                    "Run: sudo apt-get install qt6-serialport-dev")
+    message(WARNING "Qt6SerialPort not found — serial module disabled.\n"
+                    "   Windows: open Qt Maintenance Tool → Qt 6.11 → Qt Serial Port\n"
+                    "   Linux:   sudo apt-get install qt6-serialport-dev")
 endif()
 
 # ── Modbus module — requires libmodbus ─────────────────────────
@@ -39,6 +40,8 @@ if(libmodbus_FOUND)
         protocols/modbus/ModbusTcpClient.cpp
         protocols/modbus/ModbusRtuClient.h
         protocols/modbus/ModbusRtuClient.cpp
+        protocols/modbus/ModbusTcpServer.h
+        protocols/modbus/ModbusTcpServer.cpp
     )
     # vcpkg creates libmodbus::modbus; pkg-config IMPORTED_TARGET creates PkgConfig::MODBUS
     if(TARGET libmodbus::modbus)
@@ -57,6 +60,8 @@ if(lib60870_FOUND)
         protocols/iec104/IEC104DataPoint.h
         protocols/iec104/IEC104Client.h
         protocols/iec104/IEC104Client.cpp
+        protocols/iec104/IEC104Server.h
+        protocols/iec104/IEC104Server.cpp
     )
     target_link_libraries(rtu_core PUBLIC lib60870)
     target_include_directories(rtu_core PRIVATE
@@ -65,6 +70,11 @@ if(lib60870_FOUND)
         ${lib60870_SOURCE_DIR}/lib60870-C/config
     )
     target_compile_definitions(rtu_core PUBLIC RTU_IEC104_ENABLED)
+    # lib60870-C links ws2_32/iphlpapi PRIVATELY — re-link here so the final
+    # executable gets the Winsock symbols resolved when building on Windows.
+    if(WIN32)
+        target_link_libraries(rtu_core PUBLIC ws2_32 iphlpapi)
+    endif()
 endif()
 
 # ── Packet Analyzer module — always built ─────────────────────

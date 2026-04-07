@@ -16,3 +16,22 @@ target_link_libraries(Project1RTU PRIVATE
     rtu_services
     rtu_utils
 )
+
+# ── Windows: copy Qt DLLs next to the executable after each build ─────────
+# Without this the app will fail to launch with "DLL not found" errors.
+if(WIN32)
+    find_program(_windeployqt windeployqt HINTS "${Qt6_DIR}/../../../bin")
+    if(_windeployqt)
+        add_custom_command(TARGET Project1RTU POST_BUILD
+            COMMAND "${_windeployqt}"
+                    --qmldir "${CMAKE_SOURCE_DIR}/src/ui/qml"
+                    --dir    "$<TARGET_FILE_DIR:Project1RTU>"
+                    "$<TARGET_FILE:Project1RTU>"
+            COMMENT "Running windeployqt..."
+            VERBATIM
+        )
+    else()
+        message(WARNING "windeployqt not found — Qt DLLs will not be auto-deployed.\n"
+            "   Run manually: windeployqt --qmldir src/ui/qml <path/to/Project1RTU.exe>")
+    endif()
+endif()
